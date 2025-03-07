@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Gaps - UG Students</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>UG Student Learning Gaps</h1>
+        <table id="gapTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Learning Gap</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <!-- Add UG Learning Gap Form -->
+        <h2>Add UG Learning Gap</h2>
+        <form id="addGapForm">
+            <input type="text" id="gapName" placeholder="Student Name" required>
+            <input type="text" id="gapDesc" placeholder="Learning Gap Description" required>
+            <button type="submit">Add Learning Gap</button>
+        </form>
+    </div>
+
+    <script>
+        // Fetch and display UG learning gaps
+        fetch('http://localhost:5000/learning_gaps')
+            .then(response => response.json())
+            .then(data => {
+                let tableBody = document.querySelector("#gapTable tbody");
+                data.forEach(gap => {
+                    let row = `<tr>
+                        <td>${gap.Name}</td>
+                        <td>${gap.Learning_Gap}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            });
+
+        // Add UG learning gap event listener
+        document.getElementById("addGapForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let name = document.getElementById("gapName").value;
+            let gap = document.getElementById("gapDesc").value;
+
+            fetch('http://localhost:5000/add_learning_gap', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, gap })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

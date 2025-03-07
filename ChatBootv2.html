@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatbox {
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        p {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot {
+            background-color: #e5e5e5;
+            color: black;
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 10px;
+            gap: 5px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chatbox" id="chat"></div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Ask me a question..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chat = document.getElementById("chat");
+
+        const responses = {
+            "hello": "Hello! How can I assist you with your studies?",
+            "what is ai?": "AI (Artificial Intelligence) is the simulation of human intelligence in machines.",
+            "what is machine learning?": "Machine Learning is a branch of AI where machines learn from data.",
+            "how does the internet work?": "The internet is a network of computers communicating via protocols like HTTP and TCP/IP.",
+            "what is programming?": "Programming is writing code to instruct computers to perform tasks.",
+            "who invented the computer?": "Charles Babbage is known as the 'Father of the Computer'.",
+            "bye": "Goodbye! Have a great day studying!",
+            "what is c language?": "C is a general-purpose programming language that provides low-level access to memory and is widely used for system programming.",
+"what is the difference between scanf() and printf()?": "scanf() is used for input, while printf() is used for output in C.",
+"what is a pointer in c?": "A pointer is a variable that stores the memory address of another variable.",
+"what is sizeof() operator in c?": "It returns the size of a variable or data type in bytes.",
+"what is the use of malloc() and calloc()?": "malloc() allocates memory without initializing it, while calloc() allocates and initializes it to zero.",
+"what is a structure in c?": "A structure is a user-defined data type that allows storing different data types in a single unit.",
+"what is the difference between struct and union?": "A struct stores all members separately, whereas a union shares memory among all members.",
+"what is recursion in c?": "Recursion is when a function calls itself directly or indirectly.",
+"what is the difference between break and continue?": "break exits the loop, while continue skips the current iteration.",
+"what are storage classes in c?": "auto, extern, static, and register define variable scope and lifetime.",
+"what is c++?": "C++ is an extension of C that includes object-oriented programming features.",
+"what are classes and objects?": "A class is a blueprint for objects, while objects are instances of classes.",
+"what is a constructor in c++?": "A constructor is a special function that initializes an object when created.",
+"what is function overloading?": "Function overloading allows multiple functions with the same name but different parameters.",
+"what is operator overloading?": "Operator overloading allows custom definitions for operators on user-defined types.",
+"What is inheritance?": "Inheritance is a mechanism where a derived class inherits members of a base class.",
+"what is polymorphism?": "Polymorphism allows the same function to behave differently based on the object.",
+"what is an abstract class?": "An abstract class has at least one pure virtual function and cannot be instantiated.",
+"what is a virtual function?": "A virtual function is defined in a base class and overridden in a derived class.",
+"what is the difference between new and malloc()?": "new initializes memory automatically in C++, while malloc() does not.",
+"what is a segmentation fault?": "A segmentation fault occurs when a program accesses restricted memory.",
+"what is a dangling pointer?": "A pointer pointing to freed memory is a dangling pointer.",
+"what is volatile keyword in c?": "volatile tells the compiler that a variable's value may change unexpectedly.",
+"what is friend function in c++?": "A friend function can access private members of a class.",
+"what is the difference between deep copy and shallow copy?": "A deep copy copies the actual object, while a shallow copy copies references.",
+"what is namespace in c++?": "A namespace prevents naming conflicts in large programs.",
+"what is this pointer?": "The this pointer refers to the current object in a class.",
+"what is static member in c++?": "A static member belongs to the class rather than instances.",
+"what is the difference between cin and cout?": "cin is for input, and cout is for output in C++.",
+"what is the purpose of mutable keyword?": "mutable allows modification of member variables in const objects.",
+"what is artificial intelligence (ai)?": "AI is a branch of computer science that enables machines to simulate human intelligence, including learning, reasoning, and problem-solving.",
+"who is known as the father of ai?": "John McCarthy, who coined the term 'Artificial Intelligence' in 1956.",
+"what are the main types of ai?": "Narrow AI (Weak AI): AI designed for specific tasks (e.g., Siri, Alexa).<br>General AI (Strong AI): AI that can perform any intellectual task a human can.<br>Super AI: AI surpassing human intelligence (theoretical).",
+"what is machine learning (ml)?": "ML is a subset of AI that enables computers to learn from data without explicit programming.",
+"what are the types of machine learning?": "Supervised Learning: Training with labeled data.<br>Unsupervised Learning: Training with unlabeled data.<br>Reinforcement Learning: Learning based on rewards and punishments",
+"what is deep learning?": "Deep Learning is a subset of ML using artificial neural networks with multiple layers.",
+"what is natural language processing (nlp)?": "NLP enables machines to understand, interpret, and respond to human language.",
+"what is computer vision?": "A field of AI that enables machines to interpret images and videos.",
+"what is the turing test?": "A test proposed by Alan Turing to determine if a machine can exhibit human-like intelligence.",
+"what are expert systems in ai?": "AI systems that mimic human decision-making for specific tasks, using a knowledge base and inference engine.",
+"what is reinforcement learning?": "A type of ML where agents learn by interacting with the environment and receiving rewards.",
+"what is an artificial neural network (ann)?": "A model inspired by the human brain, consisting of interconnected nodes (neurons).",
+"what are activation functions in neural networks": "Functions like Sigmoid, ReLU, and Tanh that determine neuron activation.",
+"what is a perceptron?": "The simplest type of neural network, used for binary classification.",
+"what is backpropagation in neural networks?": "A training method that adjusts weights to minimize error in a neural network.",
+"what is overfitting in machine learning?": "When a model learns noise in training data, reducing its performance on new data.",
+"what is a confusion matrix in ai": "A table used to evaluate classification models by showing true positives, false positives, true negatives, and false negatives.",
+"what is transfer learning?": "Using a pre-trained model on a new but similar problem.",
+"what is generative adversarial network (gan)?": "A model consisting of two neural networks (generator and discriminator) competing to improve performance.",
+"what is an ai chatbot?": "A conversational agent that simulates human interaction using NLP and ML.",
+"what is the difference between ai, ml, and dl?": "AI: The broad field of making machines intelligent.<br>ML: A subset of AI that enables learning from data.<br>DL: A subset of ML using deep neural networks.",
+"what is a convolutional neural network (cnn)?": "A neural network primarily used for image processing.",
+"what is an lstm (long short-term memory) network?": "A type of recurrent neural network (RNN) used for sequential data like speech and text.",
+"what is edge ai?": "Running AI models directly on edge devices (e.g., smartphones, IoT devices) instead of cloud computing.",
+"what is explainable ai (xai)?": "AI models that provide transparency in decision-making.",
+"what is the ethical concern in ai?": "Issues like bias, job displacement, privacy, and security risks.",
+"what is the difference between ai and robotics?": "AI focuses on intelligence, while robotics deals with physical machines.",
+"what is an autoencoder in deep learning?": "A neural network used for unsupervised learning, mainly in data compression.",
+"what is ai bias?": "AI bias occurs when models make unfair predictions due to biased training data.",
+"what is a transformer model in ai?": "A deep learning model used in NLP, like GPT and BERT.",
+"how is ai used in healthcare?": "AI helps in medical diagnosis, drug discovery, and personalized treatment.",
+"what is ai-powered fraud detection?": "AI systems identify fraudulent transactions using pattern recognition.",
+"how does ai impact autonomous vehicles?": "AI enables self-driving cars by processing sensor data.",
+"what is ai in recommendation systems?": "AI suggests content (e.g., Netflix, Amazon) based on user behavior.",
+"how is ai used in speech recognition?": "AI powers virtual assistants like Siri, Google Assistant, and Alexa.",
+"what is the impact of ai in education?": "AI personalizes learning experiences and automates grading.",
+"what is ai in cybersecurity?": "AI detects and prevents cyber threats automatically.",
+"how does ai improve customer service?": "AI chatbots handle customer queries efficiently.",
+"what are ai-driven robots?": "Robots using AI to perform complex tasks autonomously.",
+"what is ai in finance?": "AI predicts stock market trends and automates trading.",
+"what is agi (artificial general intelligence)?": "A future AI that can perform any intellectual task like humans.",
+"what is quantum ai?": "AI models enhanced by quantum computing for faster processing.",
+"what is the singularity in ai?": "A hypothetical point when AI surpasses human intelligence.",
+"what is ai in space exploration?": "AI helps analyze space data and control robotic missions.",
+"what are ai-driven virtual influencers?": "Digital personalities created using AI for marketing.",
+"how does ai affect employment?": "AI automates jobs but also creates new opportunities.",
+"what is an ai model drift?": "When an AI model’s performance declines due to changes in real-world data.",
+"what is a hybrid ai system?": "Combining AI techniques like rule-based systems and ML.",
+"wat is responsible ai?": "Ensuring ethical use, unbiased models, and robust decision-making.",
+"how does strcmp() work in c?": "It compares two strings lexicographically and returns 0 if they are equal.",
+"what is the difference between getline() and cin?": "getline() reads an entire line, while cin stops at spaces.",
+"what is raii in c++?": "Resource Acquisition Is Initialization (RAII) ensures proper resource management.",
+"what is std::vector in c++?": "std::vector is a dynamic array from the Standard Template Library (STL).",
+"what is std::map in c++?": "std::map is an associative container that stores key-value pairs.",
+"what is extern keyword in c?": "extern tells the compiler a variable is defined elsewhere.",
+"what is pure virtual function?": "A pure virtual function has = 0 and must be overridden in derived classes.",
+"what is the difference between c and c++?": "C++ supports object-oriented programming, while C does not.",
+"what is memory leak in c++?": "A memory leak occurs when allocated memory is not freed properly.",
+"what is nullptr in c++?": "nullptr is a type-safe null pointer constant.",
+"what is a segmentation fault?": "A segmentation fault occurs when a program accesses restricted memory.",
+"what is a dangling pointer?": "A pointer pointing to freed memory is a dangling pointer.",
+"what is volatile keyword in c?": "volatile tells the compiler that a variable's value may change unexpectedly.",
+"what is friend function in c++?": "A friend function can access private members of a class.",
+"what is the difference between deep copy and shallow copy?": "A deep copy copies the actual object, while a shallow copy copies references.",
+"what is namespace in c++?": "A namespace prevents naming conflicts in large programs.",
+"what is this pointer?": "The this pointer refers to the current object in a class.",
+"what is static member in c++?": "A static member belongs to the class rather than instances.",
+"what is the difference between cin and cout?": "cin is for input, and cout is for output in C++.",
+"what is the purpose of mutable keyword?": "mutable allows modification of member variables in const objects.",
+"what is the use of inline functions?": "Inline functions reduce function call overhead.",
+"what is the difference between scanf() and printf()?": "scanf() is used for input, while printf() is used for output in C.",
+"what is a pointer in c?": "A pointer is a variable that stores the memory address of another variable.",
+"what is sizeof() operator in c?": "It returns the size of a variable or data type in bytes.",
+"what is the use of malloc() and calloc()?": "malloc() allocates memory without initializing it, while calloc() allocates and initializes it to zero.",
+"what is a structure in c?": "A structure is a user-defined data type that allows storing different data types in a single unit.",
+"what is the difference between struct and union?": "A struct stores all members separately, whereas a union shares memory among all members.",
+"what is recursion in c?": "Recursion is when a function calls itself directly or indirectly.",
+"what is the difference between break and continue?": "break exits the loop, while continue skips the current iteration.",
+"what are storage classes in c?": "auto, extern, static, and register define variable scope and lifetime.",
+"write a program to swap two numbers without a third variable": "int a = 5, b = 10;<br>a = a + b;<br>b = a - b;<br>a = a - b;",
+"write a program to reverse a string": "void reverseString(char *str) {<br> int len = strlen(str);<br>   for (int i = 0; i < len / 2; i++) {<br> char temp = str[i];<br>    str[i] = str[len - i - 1];<br>str[len - i - 1] = temp;<br>}<br>}",
+"write a program to check if a number is prime": "int isPrime(int num) {<br>    if (num < 2) return 0;<br>    for (int i = 2; i * i <= num; i++)<br>   if (num % i == 0) return 0;<br>   return 1;<br>}<br>",
+"write a c++ program for factorial using recursion": "int factorial(int n) {<br>   return (n == 0) ? 1 : n * factorial(n - 1);<br>}",
+"write a c++ program to implement a linked list": "class Node {<br> public:<br>   int data;    Node* next;<br>};"
+
+        };
+
+        function sendMessage() {
+            const userInput = document.getElementById("userInput").value.trim().toLowerCase();
+            if (userInput === "") return;
+
+            appendMessage("You: " + userInput, "user");
+            document.getElementById("userInput").value = "";
+
+            setTimeout(() => {
+                const botResponse = responses[userInput] || "I'm not sure about that. Try asking something else!";
+                appendMessage("Bot: " + botResponse, "bot");
+            }, 500);
+        }
+
+        function appendMessage(message, sender) {
+            const messageElement = document.createElement("p");
+            if (sender === "bot") {
+                messageElement.innerHTML = message;
+            } else {
+                messageElement.textContent = message;
+            }
+            messageElement.classList.add(sender);
+            chat.appendChild(messageElement);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Subject Notes as PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <h2>Download Subject Notes</h2>
+
+    <label for="subject">Select Subject:</label>
+    <select id="subject">
+        <option value="">--Select--</option>
+        <option value="Programming in C and C++">Programming in C and C++</option>
+        <option value="Computer Networks">Computer Networks</option>
+        <option value="Data Structures">Data Structures</option>
+        <option value="Database Management System">Database Management System</option>
+        <option value="Operating System">Operating System</option>
+        <option value="Web Development">Web Development</option>
+        <option value="Accountancy">Accountancy</option>
+        <option value="Economics">Economics</option>
+        <option value="Business Studies">Business Studies</option>
+        <option value="Statistics">Statistics</option>
+    </select>
+
+    <button id="downloadPdf">Download Notes as PDF</button>
+
+    <script>
+        document.getElementById("downloadPdf").addEventListener("click", function() {
+            let selectedSubject = document.getElementById("subject").value;
+
+            if (!selectedSubject) {
+                alert("Please select a subject before downloading.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            let doc = new jsPDF();
+            doc.setFontSize(16);
+            doc.text("Study Notes", 80, 20);
+            doc.setFontSize(14);
+            doc.text(`Subject: ${selectedSubject}`, 20, 40);
+            doc.setFontSize(12);
+            doc.text("----------------------------------------------------------", 20, 50);
+
+            let notes = {
+                "Programming in C and C++": `C and C++ are foundational programming languages used for system programming, game development, and application development.
+
+Key Topics:
+- Variables, Data Types, and Operators
+- Control Structures (Loops & Conditional Statements)
+- Functions and Recursion
+- Pointers and Memory Management
+- Object-Oriented Programming (Classes, Objects, Inheritance)
+- File Handling in C and C++`,
+
+                "Computer Networks": `Computer Networking involves communication between devices and systems.
+
+Key Topics:
+- OSI & TCP/IP Model
+- Networking Devices (Router, Switch, Hub)
+- IP Addressing & Subnetting
+- Protocols (HTTP, FTP, SMTP, DNS)
+- Network Security Basics
+- Wireless & Wired Networks`,
+
+                "Data Structures": `Data structures organize and manage data efficiently.
+
+Key Topics:
+- Arrays, Linked Lists
+- Stacks, Queues
+- Trees, Graphs
+- Sorting & Searching Algorithms
+- Hashing and Hash Tables`,
+
+                "Database Management System": `DBMS helps store, manage, and retrieve data efficiently.
+
+Key Topics:
+- SQL and NoSQL Databases
+- ER Diagrams and Relational Models
+- Normalization & Indexing
+- Transactions and Concurrency Control`,
+
+                "Operating System": `An Operating System manages hardware and software resources.
+
+Key Topics:
+- Process Management
+- Memory Management
+- File Systems
+- Deadlocks and Synchronization`,
+
+                "Web Development": `Web Development focuses on building websites and web applications.
+
+Key Topics:
+- HTML, CSS, and JavaScript
+- Frontend Frameworks (React, Angular, Vue)
+- Backend Technologies (Node.js, Django, Flask)
+- Databases for Web (MongoDB, MySQL)`,
+
+                "Accountancy": `Accountancy is the systematic recording, analyzing, and reporting of financial transactions.
+
+Key Topics:
+- Financial Statements
+- Double Entry System
+- Ledger and Trial Balance
+- Taxation and Auditing`,
+
+                "Economics": `Economics studies production, distribution, and consumption of goods.
+
+Key Topics:
+- Microeconomics (Demand & Supply)
+- Macroeconomics (GDP, Inflation)
+- Market Structures (Monopoly, Oligopoly)
+- Economic Policies`,
+
+                "Business Studies": `Business Studies explores business operations and management.
+
+Key Topics:
+- Business Organizations
+- Marketing and Finance
+- Human Resource Management
+- Entrepreneurship`,
+
+                "Statistics": `Statistics involves collecting, analyzing, and interpreting data.
+
+Key Topics:
+- Measures of Central Tendency (Mean, Median, Mode)
+- Probability and Distributions
+- Hypothesis Testing
+- Regression Analysis`
+            };
+
+            let selectedNotes = notes[selectedSubject] || "Notes not available for this subject.";
+            let splitNotes = doc.splitTextToSize(selectedNotes, 160);
+            doc.text(splitNotes, 20, 60);
+            doc.save(`${selectedSubject.replace(/\s+/g, '_')}_Notes.pdf`);
+        });
+    </script>
+
+</body>
+</html>

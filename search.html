@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Student</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Search Student by ID</h1>
+        <input type="text" id="studentId" placeholder="Enter Student ID">
+        <button onclick="searchStudent()">Search</button>
+        <div id="result"></div>
+    </div>
+    <script>
+    function searchStudent() {
+        let id = document.getElementById("studentId").value;
+        fetch(`http://localhost:5000/student/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                let resultDiv = document.getElementById("result");
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p><strong>Name:</strong> ${data.Name}</p>
+                        <p><strong>Grade:</strong> ${data.Grade}</p>
+                        <p><strong>Subject:</strong> ${data.Subject}</p>
+                        <p><strong>Score:</strong> ${data.Assessment_Score}</p>
+                    `;
+                }
+            });
+    }
+</script>
+</body>
+</html>

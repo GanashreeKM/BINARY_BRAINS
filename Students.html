@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student List & Learning Gaps</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Student List</h1>
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                    <th>Phone Number</th>
+                    <th>Category</th>
+                    <th>Program</th>
+                    <th>Learning Gap Category</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h2>Related Learning Videos</h2>
+        <div id="videoContainer">
+            <p>Select a Learning Gap Category to see relevant videos.</p>
+        </div>
+
+        <!-- Notes Section -->
+        <h2>Topic Notes</h2>
+        <table id="notesTable">
+            <thead>
+                <tr>
+                    <th>Selected Topic</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="selectedTopic">No topic selected</td>
+                    <td id="topicNotes">Select a topic to see notes.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Add Student Form -->
+        <h2>Add Student</h2>
+        <form id="addStudentForm">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="rollNumber" placeholder="Roll Number" required>
+            <input type="text" id="phoneNumber" placeholder="Phone Number" required>
+            <select id="category" required>
+                <option value="">Select Category</option>
+                <option value="UG">Undergraduate (UG)</option>
+                <option value="PG">Postgraduate (PG)</option>
+            </select>
+            <select id="program" style="display:none;" required>
+                <!-- Options will be dynamically populated -->
+            </select>
+            <select id="learningGapCategory" required>
+                <!-- This will be dynamically updated based on UG/PG selection -->
+            </select>
+            <button type="submit">Add Student</button>
+        </form>
+    </div>
+
+    <script>
+        const ugPrograms = ["BCA", "BCOM"];
+        const pgPrograms = ["CS", "ECE"];
+
+        const ugCategories = {
+            "BCA": ["Programming in C and C++", "Data Structures", "Database Management System", "Computer Network", "Operating System", "Web Development"],
+            "BCOM": ["Accountancy", "Economics", "Business Studies", "Statistics"]
+        };
+        
+        const pgCategories = {
+            "CS": ["Programming in C and C++", "Cryptography and Network Security", "IoT (Internet of Things)", "Data Science and Big Data Analytics"],
+            "ECE": ["Circuits", "Microcontrollers", "Semiconductors", "Communication Systems"]
+        };
+
+        // Fetch students and update the table
+        function loadStudents() {
+            fetch('http://localhost:5000/students')
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.querySelector("#studentTable tbody");
+                    tableBody.innerHTML = ""; // Clears old table entries before adding new ones
+
+                    data.forEach(student => {
+                        let row = `
+                            <tr>
+                                <td>${student.Student_ID}</td>
+                                <td>${student.Name}</td>
+                                <td>${student.Roll_Number}</td>
+                                <td>${student.Phone_Number}</td>
+                                <td>${student.Category}</td>
+                                <td>${student.Program}</td>
+                                <td>${student.Learning_Gap_Category}</td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                });
+        }
+
+        // Load students when the page loads
+        window.onload = loadStudents;
+
+        // Ensure table updates properly when a new student is added
+        document.getElementById("addStudentForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let name = document.getElementById("name").value;
+            let rollNumber = document.getElementById("rollNumber").value;
+            let phoneNumber = document.getElementById("phoneNumber").value;
+            let category = document.getElementById("category").value;
+            let program = document.getElementById("program").value;
+            let learningGapCategory = document.getElementById("learningGapCategory").value;
+
+            fetch('http://localhost:5000/add_student', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, rollNumber, phoneNumber, category, program, learningGapCategory })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                loadStudents(); // Refresh the table to avoid duplicate entries
+            });
+        });
+
+        // Update program and gap category based on selection
+        document.getElementById("category").addEventListener("change", function() {
+            let selectedCategory = this.value;
+            let programSelect = document.getElementById("program");
+            let gapSelect = document.getElementById("learningGapCategory");
+            programSelect.innerHTML = "";
+            gapSelect.innerHTML = "";
+
+            let programs = selectedCategory === "UG" ? ugPrograms : (selectedCategory === "PG" ? pgPrograms : []);
+            if (programs.length) {
+                programs.forEach(program => {
+                    let option = document.createElement("option");
+                    option.value = program;
+                    option.textContent = program;
+                    programSelect.appendChild(option);
+                });
+                programSelect.style.display = "block";
+                programSelect.dispatchEvent(new Event("change")); // Ensure learning gaps update
+            } else {
+                programSelect.style.display = "none";
+            }
+        });
+
+        // Update learning gap categories based on selected program
+        document.getElementById("program").addEventListener("change", function() {
+            let selectedProgram = this.value;
+            let gapSelect = document.getElementById("learningGapCategory");
+            gapSelect.innerHTML = "";
+
+            let categories = ugCategories[selectedProgram] || pgCategories[selectedProgram] || [];
+            categories.forEach(cat => {
+                let option = document.createElement("option");
+                option.value = cat;
+                option.textContent = cat;
+                gapSelect.appendChild(option);
+            });
+
+            // Trigger video update when learning gap changes
+            gapSelect.dispatchEvent(new Event("change"));
+        });
+
+        // Fetch YouTube videos intelligently
+        function fetchYouTubeVideos(query) {
+            let videoContainer = document.getElementById("videoContainer");
+            videoContainer.innerHTML = "<p>Loading videos...</p>";
+            document.getElementById("selectedTopic").textContent = query;
+            document.getElementById("topicNotes").textContent = "Fetching notes...";
+
+            // Check if we have predefined videos first
+            if (learningGapVideos[query]) {
+                videoContainer.innerHTML = `
+                    <iframe width="560" height="315" src="${learningGapVideos[query]}" frameborder="0" allowfullscreen></iframe>
+                    <p>${query}</p>
+                `;
+                return;
+            }
+
+            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${MAX_RESULTS}&key=${YOUTUBE_API_KEY}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.items || data.items.length === 0) {
+                        videoContainer.innerHTML = "<p>No videos found for this topic.</p>";
+                        return;
+                    }
+
+                    videoContainer.innerHTML = data.items.map(video => `
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/${video.id.videoId}" frameborder="0" allowfullscreen></iframe>
+                        <p>${video.snippet.title}</p>
+                    `).join("");
+                })
+                .catch(error => {
+                    console.error("Error fetching YouTube videos:", error);
+                    videoContainer.innerHTML = "<p>Error loading videos. Please try again.</p>";
+                });
+        }
+
+        // Mapping of Learning Gap Categories to YouTube Video URLs
+        const learningGapVideos = {
+            "Programming in C and C++": "https://www.youtube.com/embed/KJgsSFOSQv0",
+            "Data Structures": "https://www.youtube.com/embed/8hly31xKli0",
+            "Database Management System": "https://www.youtube.com/embed/IyVOrDNASRo",
+            "Computer Network": "https://www.youtube.com/embed/qiQR5rTSshw",
+            "Operating System": "https://www.youtube.com/embed/_6ZNU5BzNqM",
+            "Web Development": "https://www.youtube.com/embed/Q33KBiDriJY",
+            "Accountancy": "https://www.youtube.com/embed/65YYcWCORlU",
+            "Economics": "https://www.youtube.com/embed/3ez10ADR_gM",
+            "Business Studies": "https://www.youtube.com/embed/3aymHTLPKXE",
+            "Statistics": "https://www.youtube.com/embed/xxpc-HPKN28"
+        };
+
+        const YOUTUBE_API_KEY = "AIzaSyDVca-ke2gKjsucVMWCWM3xem0103vfVQk"; // Replace with your actual key
+        const MAX_RESULTS = 3;
+
+        // Event listener for learning gap category change
+        document.getElementById("learningGapCategory").addEventListener("change", function() {
+            let selectedCategory = this.value;
+            if (selectedCategory) {
+                fetchYouTubeVideos(selectedCategory);
+            }
+        });
+
+    </script>
+</body>
+</html>
